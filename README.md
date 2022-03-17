@@ -8,8 +8,8 @@
 
 (4)设计Frontier和Explored（Open表和Closed表）的数据结构    
 
-(5)State中动画相关的函数 关于双缓冲技术的博文  
-https://www.cnblogs.com/zmjarek/p/4228399.html  
+~~(5)State中动画相关的函数 关于双缓冲技术的博文  
+https://www.cnblogs.com/zmjarek/p/4228399.html  ~~  Yaokong
 
 (6)astar和idaStar的实现  
 

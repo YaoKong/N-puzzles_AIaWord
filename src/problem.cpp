@@ -116,8 +116,33 @@ void animation(char* path){
 	free(buffer);   //释放掉buffer所占空间
 }
 
-static void drawArrow(int size, char action){
+//小小地修改了一下这个函数，多加了一个参数
+static void drawArrow(int size, char action, PzlState* state){
 	//FixMe.
+	char arrows[] = { '↑', '-->','↓', '<--' };
+	char arrow = arrows[toDirection(action)];
+	for (int i = 0; i < _size; i++) {
+		//画分割线
+		for (int i = 0; i < _size; i++) {
+			printf("+---");
+		}
+		printf("+\n");
+
+		//输出对应格子
+		for (int j = 0; j < _size; j++) {
+			char c = getValue(state->status, i * _size + j) - 48;
+			if (c == '0') c = arrow;
+
+			printf("| %c ", c);
+		}
+		printf("|\n");
+	}
+
+	//画分割线
+	for (int i = 0; i < _size; i++) {
+		printf("+---");
+	}
+	printf("+\n");
 }
 
 /// <summary>
@@ -132,10 +157,22 @@ void drawSolution(char* path){
 	char caption[200];   //标题
 	sprintf_s(caption, 200, "solving problem %02d......", count);
 	PzlState currState = *getInit();
+	PzlState child;
 
 	char* p = path;
 	while (*p) {
 		drawState(&currState);
+		Sleep(500);
+
+		drawArrow(_size, *p, &currState);
+		Sleep(500);
+
+
+		nextState(&currState, toDirection(*p), &child);
+		drawState(&child);
+		Sleep(500);
+
+		currState = child;	//更新当前状态
 		p++;
 	}
 

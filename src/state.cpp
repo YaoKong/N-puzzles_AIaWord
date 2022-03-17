@@ -151,11 +151,32 @@ int getParity(PzlState* state) {
 ///     将 “| 8 | # | 7 |”, 用‘|’包围的数字或空格#, 写入缓冲区
 /// <returns>写入缓冲区的字符的个数</returns>
 static int rowToBuffer(char* buffer, int start, PzlState* state, int row) {
-    int k = 1;
+    int k = 0;
     //Fix Me.
-    char c = getValue(state->status, row) -  48;
-    *buffer = c;
+    for(int i = 0; i < _size; i++) {
+        char c = getValue(state->status, start + i) - 48;
+        if (c == '0') c = '#';
+
+        *buffer = '|';
+        buffer++;
+        for(int j = 0; j < 3; j++) {
+	        if(j == 1) {
+                *buffer = c;
+                buffer++;
+	        }
+            else {
+                *buffer = ' ';
+                buffer++;
+            }
+        }
+        k += 4;
+    }
+    *buffer = '|';
     buffer++;
+    *buffer = '\n';
+    buffer++;
+    k += 2;
+
     return k;
 }
 
@@ -165,10 +186,25 @@ static int rowToBuffer(char* buffer, int start, PzlState* state, int row) {
 /// <param name="buffer"></param>
 /// <returns>写入缓冲区的字符的个数</returns>
 static int lineToBuffer(char* buffer) {
-    int k = 1;
+    int k = 0;
     //Fix Me.
-    *buffer = '|';
+    for(int i = 0; i < _size; i++) {
+        char* p = buffer;
+        *buffer = '+';
+        buffer++;
+
+        for(int j = 0; j < 3; j++) {
+            *(p + j) = '-';
+        }
+
+        buffer += 4;
+        k += 4;
+    }
+    *buffer = '+';
     buffer++;
+    *buffer = '\n';
+
+    k+= 2;
     return k;
 }
 
@@ -190,6 +226,13 @@ char* toCharBuffer(PzlState * state, char* buffer, int buffer_size) {
     int k = 0;
     //Fix Me. 要求调用rowToBuffer和lineToBuffer函数
 
+    for(int i = 0; i < _size; i++) {
+        k += lineToBuffer(buffer + k);  //写入一行分隔符
+        
+        k += rowToBuffer(buffer + k, i * _size, state, i);  //写入一行数字
+
+    }
+    lineToBuffer(buffer + k);   //末尾补上分隔符
     return buffer;
 }
 
@@ -221,9 +264,12 @@ void drawState(PzlState* state) {
     for(int i = 0; i < _size; i++) {
         drawLine();
 	    for(int j = 0; j < _size; j++) {
-            printf("| %d ", getValue(state->status, i * _size + j));
+            char c = getValue(state->status, i * _size + j) - 48;
+            if (c == '0') c = '#';
+
+            printf("| %c ", c);
 	    }
-        printf("|");
+        printf("|\n");
     }
     drawLine();
 }
