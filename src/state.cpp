@@ -123,7 +123,7 @@ void nextState(PzlState* state, int action, PzlState* child) {
 PzlState* nextStates(PzlState* state, int* numOfChild) {
     
     //Fix Me.
-    //要求调用nextState函数
+    //要求调用nextState函数a
 }
 
 /// <summary>
