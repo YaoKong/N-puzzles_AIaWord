@@ -1,6 +1,14 @@
 #include <state.h>
 #include <direction.h>
-#include <string.h>
+#include <iostream>
+#include <map>
+#include <queue>
+#include <string>
+
+#include "generateDatabase.h"
+
+
+using namespace std;
 //对于同一个问题的所有状态，其阶数和目标状态都是相同的，
 static int _size = 0;  //数字推盘的边长 3， 4
 static byte* posInGoal = NULL; //4阶：指向16个byte连续数据区（空格0以及1~15在目标状态中的位置）的指针
@@ -47,8 +55,11 @@ void setPzlState(PzlState* state, byte status[]) {
 /// <returns>空格移动以后，新状态的64位二进制表示</returns>
 static uLong moveTile(uLong status, int blankPos, int index) {
     //Fix Me.
-    status = setValue(status, blankPos, getValue(status, index));
+
+    
+	status = setValue(status, blankPos, getValue(status, index));
     status = resetZero(status, index);
+
     return status;
 }
 
@@ -56,7 +67,11 @@ static uLong moveTile(uLong status, int blankPos, int index) {
 //i，j为单元格的序号（例如：0~15）
 static int singleManhattan(int i, int j) {
     //Fix Me.
-    return 0;
+    int x1 = i / _size;
+    int x2 = j / _size;
+    int y1 = i % _size;
+    int y2 = j % _size;
+    return abs(x1 - x2) + abs(y1 -  y2);
 }
 
 /// <summary>
@@ -67,6 +82,19 @@ static int singleManhattan(int i, int j) {
 int manhattan(const PzlState& state) {
     int manhattan = 0;
     //Fix Me.
+    byte* now = getValues(state.status);
+
+
+    for(int i = 0; i < _size * _size; i++) {
+        byte value = now[i];
+        int j;
+        for(j = 0; j < _size * _size; j++) {
+	        if(posInGoal[j] == value) {
+                break;
+	        }
+        }
+        manhattan += singleManhattan(i , j);
+    }
     return manhattan;
 }
 
@@ -78,8 +106,14 @@ int manhattan(const PzlState& state) {
 int hamming(const PzlState& state){
     int hamming = 0;
     //Fix Me.
+    byte* now = getValues(state.status);
+    for(int i = 0; i < _size * _size; i++) {
+        if (now[i] != posInGoal[i]) hamming++;
+    }
     return hamming;
 }
+
+
 
 /// <summary>
 /// 通过disjoint pattern计算状态state与目标状态的距离
@@ -89,15 +123,14 @@ int hamming(const PzlState& state){
 int disjoint(const PzlState& state){
     int disjoint = 0;
     //Fix Me.
+    for(int i = 0; i < tables->size(); i++) {
+        disjoint += (*tables)[i][state.status];
+    }
+
     return disjoint;
 }
 
-//当前空格以偏移量offset的移动是否合法
-//blankPos: 当前空格所在的位置序号（0~15）
-static int validMove(int blankPos, int offset[]) {
-    //Fix Me.
-    return 0;
-}
+
 
 /// <summary>
 /// 当前状态在执行action后的后继状态
@@ -109,8 +142,12 @@ void nextState(PzlState* state, int action, PzlState* child) {
     
     //Fix Me. 
     //要求调用moveTile函数
-    child->blankPos = state->blankPos +  getOffsets(action)[1] * _size + getOffsets(action)[0]; //后继状态的空格位置
-    child->status = moveTile(state->status, state->blankPos, child->blankPos);  //获得后继状态
+    int blankPos = state->blankPos;
+    uLong status = state->status;
+        child->blankPos = blankPos + getOffsets(action)[1] * _size + getOffsets(action)[0]; //后继状态的空格位置
+        child->status = moveTile(status, blankPos, child->blankPos);  //获得后继状态
+        child->manhattan = manhattan(*child);
+
 }
 
 /*
@@ -120,10 +157,27 @@ void nextState(PzlState* state, int action, PzlState* child) {
      numOfChild: 可行的后继状态的个数
    返回值：所有后继状态的数组
 */
-PzlState* nextStates(PzlState* state, int* numOfChild) {
+PzlState* nextStates(PzlState* state, int* numOfChild, int dummy[]) {
     
     //Fix Me.
-    //要求调用nextState函数a
+    //要求调用nextState函数
+    *numOfChild = 0;
+
+
+    PzlState* nState = new PzlState[4];
+    for(int i = 0; i < 4; i++) {
+	    if(validMove(state->blankPos, getOffsets(i), _size)) {
+            nextState(state, i, &nState[i]);
+            (*numOfChild)++;
+            dummy[i] = 1;
+            continue;
+	    }
+
+        dummy[i] = 0;
+    }
+
+
+    return nState;
 }
 
 /// <summary>
@@ -137,7 +191,17 @@ int getParity(PzlState* state) {
     int inversions = 0;
 
     //Fix Me.
+    //计算逆序数之和
+    byte* values = getValues(state->status);
+    for(int i = 0; i < _size * _size; i++) {
+		for(int j = i; j < _size * _size; j++) {
+            if (values[i] < values[j]) inversions++;
+		}
+    }
 
+
+
+    free(values);
     return inversions;
 }
 
@@ -153,29 +217,35 @@ int getParity(PzlState* state) {
 static int rowToBuffer(char* buffer, int start, PzlState* state, int row) {
     int k = 0;
     //Fix Me.
-    for(int i = 0; i < _size; i++) {
-        char c = getValue(state->status, start + i) - 48;
-        if (c == '0') c = '#';
 
-        *buffer = '|';
-        buffer++;
-        for(int j = 0; j < 3; j++) {
-	        if(j == 1) {
-                *buffer = c;
-                buffer++;
+    for(int i = 0; i < _size; i++) {
+        int c = getValue(state->status, start + i) ;
+        string temp = "|";
+        if (c == 0) temp += " # ";
+        else {
+	        if(c < 10) {
+                temp +=  ' ' + to_string(c) + ' ';
 	        }
-            else {
-                *buffer = ' ';
-                buffer++;
+            else if(c < 100) {
+	            temp += ' ' + to_string(c);
             }
+            else {
+                temp += to_string(c);
+            }
+        }
+        
+        
+        for(int j = 0; j < 4; j++) {
+            *(buffer + k + j) = temp[j];
+            // cout << buffer <<endl;
         }
         k += 4;
     }
-    *buffer = '|';
-    buffer++;
-    *buffer = '\n';
-    buffer++;
-    k += 2;
+    *(buffer + k) = '|';
+	k++;
+    // *(buffer + k) = '\n';
+    // k++;
+
 
     return k;
 }
@@ -188,23 +258,23 @@ static int rowToBuffer(char* buffer, int start, PzlState* state, int row) {
 static int lineToBuffer(char* buffer) {
     int k = 0;
     //Fix Me.
+
     for(int i = 0; i < _size; i++) {
-        char* p = buffer;
         *buffer = '+';
         buffer++;
 
         for(int j = 0; j < 3; j++) {
-            *(p + j) = '-';
+            *(buffer + j) = '-';
         }
 
-        buffer += 4;
+        buffer += 3;
         k += 4;
     }
     *buffer = '+';
-    buffer++;
-    *buffer = '\n';
+    // buffer++;
+    // *buffer = '\n';
 
-    k+= 2;
+    k+= 1;
     return k;
 }
 
@@ -228,11 +298,13 @@ char* toCharBuffer(PzlState * state, char* buffer, int buffer_size) {
 
     for(int i = 0; i < _size; i++) {
         k += lineToBuffer(buffer + k);  //写入一行分隔符
-        
+
         k += rowToBuffer(buffer + k, i * _size, state, i);  //写入一行数字
 
+
     }
-    lineToBuffer(buffer + k);   //末尾补上分隔符
+    k += lineToBuffer(buffer + k);   //末尾补上分隔符
+
     return buffer;
 }
 
@@ -264,7 +336,7 @@ void drawState(PzlState* state) {
     for(int i = 0; i < _size; i++) {
         drawLine();
 	    for(int j = 0; j < _size; j++) {
-            char c = getValue(state->status, i * _size + j) - 48;
+            char c = getValue(state->status, i * _size + j) + 48;
             if (c == '0') c = '#';
 
             printf("| %c ", c);

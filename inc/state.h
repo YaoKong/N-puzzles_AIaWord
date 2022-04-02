@@ -14,7 +14,7 @@ typedef struct PuzzleState PzlState;
 
 extern void setStateSize(int size);
 extern void setPzlState(PzlState* state, byte status[]);
-extern PzlState* nextStates(PzlState* state, int* numOfChild);
+extern PzlState* nextStates(PzlState* state, int* numOfChild, int* dummy);
 extern void drawState(PzlState* state);
 extern char* toCharBuffer(PzlState* state, char* buffer, int buffer_size);
 extern void nextState(PzlState* state, int action, PzlState* child);

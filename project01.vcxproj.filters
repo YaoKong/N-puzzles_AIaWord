@@ -36,6 +36,15 @@
     <ClInclude Include="inc\uLong.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="inc\performance.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\generateDatabase.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\aStar.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\cell.cpp">
@@ -57,6 +66,12 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="src\uLong.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\performance.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\generateDatabase.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

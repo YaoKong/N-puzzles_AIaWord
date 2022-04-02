@@ -1,5 +1,7 @@
 #include <problem.h>
+#include <performance.h>
 
+#include "generateDatabase.h"
 /// <summary>
 /// 读入数字推盘的一个局面状态
 /// </summary>
@@ -22,18 +24,41 @@ void solvePuzzle(int n)
 
 /// 读入一个新的问题 ///
     int size;
+    printf("Plese input problem size:");
     scanf_s("%d", &size);
     byte* init = getStatus(size * size);
     byte* goal = getStatus(size * size);
     newProblem(goal, init, size);
-    free(goal); //释放掉goal和init所占用的空间
-    free(init);
+
 
 /// 求解该问题并动画模拟 ///
     char path[100];
-    astar(path, manhattan); 
-    drawSolution(path);
-    //animation(path);
+    PerformanceTester pt;
+
+    // pt.Start();
+    //启发函数为曼哈顿距离
+    // astar(path, manhattan);
+    // idaStar(path, manhattan);
+    // pt.Stop();
+    // pt.OutputToFile("astar_manhattan.csv", path, init, goal, size);
+    // pt.OutputToFile("idaStar_manhattan.csv", path, init, goal, size);
+
+    //启发函数为不相交数据库距离
+    initDatabase(getGoal(), size);
+	pt.Start();
+    // astar(path, manhattan);
+    idaStar(path, disjoint);
+    pt.Stop();
+    // pt.OutputToFile("astar_disjoint.csv", path, init, goal, size);
+    pt.OutputToFile("idaStar_disjoint.csv", path, init, goal, size);
+
+
+
+    // drawSolution(path);
+    animation(path);
+
+	free(goal); //释放掉goal和init所占用的空间
+    free(init);
 }
 
 int main() {

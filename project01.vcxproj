@@ -93,6 +93,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <LargeAddressAware>true</LargeAddressAware>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -140,9 +141,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="inc\aStar.h" />
     <ClInclude Include="inc\cell.h" />
     <ClInclude Include="inc\direction.h" />
+    <ClInclude Include="inc\generateDatabase.h" />
     <ClInclude Include="inc\node.h" />
+    <ClInclude Include="inc\performance.h" />
     <ClInclude Include="inc\problem.h" />
     <ClInclude Include="inc\state.h" />
     <ClInclude Include="inc\twobuff.h" />
@@ -151,6 +155,8 @@
   <ItemGroup>
     <ClCompile Include="src\cell.cpp" />
     <ClCompile Include="src\direction.cpp" />
+    <ClCompile Include="src\generateDatabase.cpp" />
+    <ClCompile Include="src\performance.cpp" />
     <ClCompile Include="src\problem.cpp" />
     <ClCompile Include="src\puzzle-main.cpp" />
     <ClCompile Include="src\state.cpp" />
