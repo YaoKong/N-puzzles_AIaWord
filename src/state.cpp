@@ -121,11 +121,10 @@ int hamming(const PzlState& state){
 /// <param name="state"></param>
 /// <returns>当前状态state到目标状态的距离</returns>
 int disjoint(const PzlState& state){
-    int disjoint = 0;
+    int disjoint = getDisjoint(state.status);
     //Fix Me.
-    for(int i = 0; i < tables->size(); i++) {
-        disjoint += (*tables)[i][state.status];
-    }
+
+
 
     return disjoint;
 }
@@ -163,6 +162,11 @@ PzlState* nextStates(PzlState* state, int* numOfChild, int dummy[]) {
     //要求调用nextState函数
     *numOfChild = 0;
 
+    // byte* temp = getValues(state->status);
+    // for (int i = 0; i < _size * _size; i++) {
+    //     printf("%hhu", temp[i]);
+    // }
+    // printf("\n");
 
     PzlState* nState = new PzlState[4];
     for(int i = 0; i < 4; i++) {
@@ -170,6 +174,13 @@ PzlState* nextStates(PzlState* state, int* numOfChild, int dummy[]) {
             nextState(state, i, &nState[i]);
             (*numOfChild)++;
             dummy[i] = 1;
+
+            // byte* temp = getValues(nState[i].status);
+            // for (int i = 0; i < _size * _size; i++) {
+            //     printf("%hhu", temp[i]);
+            // }
+            // printf("\n");
+
             continue;
 	    }
 

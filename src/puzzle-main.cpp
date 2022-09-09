@@ -35,27 +35,27 @@ void solvePuzzle(int n)
     char path[100];
     PerformanceTester pt;
 
-    // pt.Start();
+    pt.Start();
     //启发函数为曼哈顿距离
     // astar(path, manhattan);
-    // idaStar(path, manhattan);
-    // pt.Stop();
-    // pt.OutputToFile("astar_manhattan.csv", path, init, goal, size);
+    idaStar(path, manhattan);
+    pt.Stop();
+    pt.OutputToFile("astar_manhattan.csv", path, init, goal, size);
     // pt.OutputToFile("idaStar_manhattan.csv", path, init, goal, size);
 
     //启发函数为不相交数据库距离
-    initDatabase(getGoal(), size);
-	pt.Start();
-    // astar(path, manhattan);
-    idaStar(path, disjoint);
-    pt.Stop();
+ //    initDatabase(getGoal(), size);
+	// pt.Start();
+ //    astar(path, disjoint);
+    // idaStar(path, disjoint);
+    // pt.Stop();
     // pt.OutputToFile("astar_disjoint.csv", path, init, goal, size);
-    pt.OutputToFile("idaStar_disjoint.csv", path, init, goal, size);
+    // pt.OutputToFile("idaStar_disjoint.csv", path, init, goal, size);
 
 
 
     // drawSolution(path);
-    animation(path);
+    // animation(path);
 
 	free(goal); //释放掉goal和init所占用的空间
     free(init);
@@ -72,4 +72,30 @@ int main() {
     return 0;
 }
 
+//官方代码如下：
+//
+// #include <SFML/Graphics.hpp>
+//
+// int main()
+// {
+//     sf::RenderWindow window(sf::VideoMode(200, 200), "SFML works!");
+//     sf::CircleShape shape(100.f);
+//     shape.setFillColor(sf::Color::Green);
+//
+//     while (window.isOpen())
+//     {
+//         sf::Event event;
+//         while (window.pollEvent(event))
+//         {
+//             if (event.type == sf::Event::Closed)
+//                 window.close();
+//         }
+//
+//         window.clear();
+//         window.draw(shape);
+//         window.display();
+//     }
+//
+//     return 0;
+// }
 

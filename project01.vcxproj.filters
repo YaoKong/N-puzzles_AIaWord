@@ -45,6 +45,9 @@
     <ClInclude Include="inc\aStar.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="inc\robin_hood.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\cell.cpp">

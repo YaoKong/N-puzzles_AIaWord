@@ -14,7 +14,7 @@ void initDatabase(PzlState* state, int size)
 		partitions->clear();
 	}
 	else {
-		tables = new std::vector<std::map<uLong, int> >;
+		tables = new std::vector<std::map<uLong, int>* >;
 	}
 
 	aSize = size;
@@ -24,7 +24,7 @@ void initDatabase(PzlState* state, int size)
 
 	
 	for(tableIndex = 0; tableIndex < partitions->size(); tableIndex++) {
-		tables->push_back(std::map<uLong, int>());
+		tables->push_back((new std::map<uLong, int>()));
 		bfs(state);
 	}
 }
@@ -39,7 +39,7 @@ void bfs(PzlState* state)
 	Node* currentState = new Node(*state, -1, NULL, 0, 0);
 
 
-	std::map<uLong, int>* temp = &(*tables)[tableIndex];
+	std::map<uLong, int>* temp = (*tables)[tableIndex];
 	(*temp)[state->status] = 0;
 
 	std::queue<Node*> tempQueue;
@@ -52,6 +52,7 @@ void bfs(PzlState* state)
 		int numOfChild;
 		int dummy[4];
 		PzlState* children = nextStates(&currentState->state, &numOfChild, dummy);
+		delete[]children;
 
 		for(int i = 0; i < 4; i++) {
 			if (!dummy[i]) continue;
@@ -59,16 +60,15 @@ void bfs(PzlState* state)
 				if ((i + 2) % 4 == currentState->parent->action) continue;
 			}
 
-
-
-			Node* tempNode = new Node(children[i], i, currentState, currentState->pathCost, currentState->hValue);
+			Node* tempNode = new Node(currentState->state, i, currentState, currentState->pathCost, currentState->hValue);
 
 			Node* p = moveNode(tempNode);
 			if(p != NULL) {
 				tempQueue.push(p);
 			}
 		}
-		delete[] children;
+		delete currentState;
+
 	}
 }
 
@@ -138,19 +138,39 @@ Node* moveNode(Node* currentState)
 
 
 	//添加当前状态到表中
-	std::map<int, bool>& p = (*partitions)[tableIndex];
-	if( p[child.blankPos]) {	//交换该组的索引位置
-		p[child.blankPos] = false;
-		p[state.blankPos] = true;
-		hValue++;
+	std::map<int, bool>* p = &(*partitions)[tableIndex];
+	if( (*p)[child.blankPos]) {	//交换该组的索引位置
+		if((*p)[state.blankPos]) {
+			hValue += 2;
+		}
+		else {
+
+			(*p)[child.blankPos] = false;
+			(*p)[state.blankPos] = true;
+			hValue++;
+		}
+
 	}
 
 	Node* nState = new Node(child, -1, currentState, currentState->pathCost + 1, hValue);
 
-	std::map<uLong, int>& table = (*tables)[tableIndex];
-	if(table.count(child.status) == 0 || (table)[child.status] > nState->hValue) {
-		(table)[child.status] = hValue;
+	std::map<uLong, int>* table = (*tables)[tableIndex];
+	if(table->count(child.status) == 0 || (*table)[child.status] > nState->hValue) {
+		(*table)[child.status] = hValue;
+	}
+	else {
+		return NULL;
 	}
 
 	return nState;
+}
+
+int getDisjoint(uLong status) {
+	int disjoint = 0;
+	int num = tables->size();
+
+	for(int i = 0; i < num; i++) {
+		disjoint += (*((*tables)[i]))[status];
+	}
+	return disjoint;
 }
